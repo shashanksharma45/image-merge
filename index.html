@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Screenshot Tool</title>
+</head>
+<body>
+    <div class="container">
+        <div class="canvas-container">
+            <div class="canvas-item">
+                <h2 class="heading">LAPTOP SCREENSHOT</h2>
+                <canvas id="laptop-canvas" tabindex="1"></canvas>
+                <div class="dropdown-container">
+                    <select id="screen-size-dropdown-laptop">
+                        <option value="1366x768">1366x768 (15.6")</option>
+                        <option value="1440x900">1440x900 (17")</option>
+                        <option value="1536x864">1536x864 (15.6")</option>
+                        <option value="1600x900">1600x900 (17")</option>
+                        <option value="1920x1080">1920x1080 (21.5")</option>
+                        <option value="1920x1200">1920x1200 (24")</option>
+                        <option value="2560x1440">2560x1440 (27")</option>
+                        <option value="2880x1800">2880x1800 (27")</option>
+                        <option value="3840x2160">3840x2160 (27")</option>
+                    </select>
+                    <button class="remove-button" data-canvas-id="laptop-canvas">Remove</button>
+                </div>
+            </div>
+            <div class="canvas-item">
+                <h2 class="heading">MOBILE SCREENSHOT</h2>
+                <canvas id="mobile-canvas" tabindex="2"></canvas>
+                <div class="dropdown-container">
+                    <select id="screen-size-dropdown-mobile">
+                        <option value="none">MOBILE</option>
+                        <option value="1366x768">1366x768 (15.6")</option>
+                        <option value="1440x900">1440x900 (17")</option>
+                        <option value="1536x864">1536x864 (15.6")</option>
+                        <option value="1600x900">1600x900 (17")</option>
+                        <option value="1920x1080">1920x1080 (21.5")</option>
+                        <option value="1920x1200">1920x1200 (24")</option>
+                        <option value="2560x1440">2560x1440 (27")</option>
+                        <option value="2880x1800">2880x1800 (27")</option>
+                        <option value="3840x2160">3840x2160 (27")</option>
+                        <option value="1125x2436">1125x2436 (5.8")</option>
+                        <option value="828x1792">828x1792 (6.1")</option>
+                        <option value="1080x2340">1080x2340 (6.5")</option>
+                        <option value="1440x2960">1440x2960 (6.3")</option>
+                        <option value="1440x3200">1440x3200 (6.5")</option>
+                    </select>
+                    <button class="remove-button" data-canvas-id="mobile-canvas">Remove</button>
+                </div>
+            </div>
+        </div>
+        <button id="combine-button">Combine</button>
+        <button id="measure-size-button">Measure Screen Size</button>
+        <p id="screen-size-info"></p>
+        <img id="result-image" alt="Combined Screenshot">
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

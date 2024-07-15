@@ -1,0 +1,87 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: rgb(112, 101, 237);
+    color: white; /* Set text color to white */
+}
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.canvas-container {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+.canvas-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+canvas {
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #fff;
+}
+canvas.selected {
+    border: 2px solid #4CAF50;
+}
+#combine-button, #measure-size-button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+#combine-button:hover, #measure-size-button:hover {
+    background-color: hsl(224, 40%, 21%);
+}
+.heading {
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+#result-image {
+    margin-top: 20px;
+    max-width: 100%;
+    display: none;
+}
+select {
+    margin-top: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 16px;
+}
+.dropdown-container {
+    display: flex;
+    align-items: center;
+    color: white; /* Set text color to white */
+}
+.remove-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+    margin-left: 10px;
+}
+.remove-button:hover {
+    background-color: #d32f2f;
+}
+/* Adjusted sizes for canvases */
+#laptop-canvas {
+    width: 740px;
+    height: 450px;
+}
+#mobile-canvas {
+    width: 318px;
+    height: 450px;
+}
