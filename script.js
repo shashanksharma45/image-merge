@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const laptopCanvas = document.getElementById("laptop-canvas");
     const mobileCanvas = document.getElementById("mobile-canvas");
     const combineButton = document.getElementById("combine-button");
@@ -7,19 +7,21 @@ document.addEventListener("DOMContentLoaded", function() {
     const screenSizeInfo = document.getElementById("screen-size-info");
     const screenSizeDropdownLaptop = document.getElementById("screen-size-dropdown-laptop");
     const screenSizeDropdownMobile = document.getElementById("screen-size-dropdown-mobile");
+    const result = document.getElementById('upi-text');
+    const copyBtn = document.getElementById("copy-btn");
 
     let laptopImage = null;
     let mobileImage = null;
 
-    laptopCanvas.addEventListener("click", function() {
+    laptopCanvas.addEventListener("click", function () {
         selectCanvas(laptopCanvas);
     });
 
-    mobileCanvas.addEventListener("click", function() {
+    mobileCanvas.addEventListener("click", function () {
         selectCanvas(mobileCanvas);
     });
 
-    document.addEventListener("paste", function(event) {
+    document.addEventListener("paste", function (event) {
         const clipboardData = event.clipboardData;
         const items = clipboardData.items;
         if (items.length > 0) {
@@ -27,9 +29,9 @@ document.addEventListener("DOMContentLoaded", function() {
             if (imageItem) {
                 const imageFile = imageItem.getAsFile();
                 const reader = new FileReader();
-                reader.onload = function(event) {
+                reader.onload = function (event) {
                     const image = new Image();
-                    image.onload = function() {
+                    image.onload = function () {
                         const focusedElement = document.activeElement;
                         if (focusedElement === laptopCanvas) {
                             laptopImage = image;
@@ -58,6 +60,27 @@ document.addEventListener("DOMContentLoaded", function() {
         canvas.focus();
     }
 
+    // function displayImage(canvas, image) {
+    //     const ctx = canvas.getContext("2d");
+    //     const aspectRatio = image.width / image.height;
+    //     const maxWidth = canvas.clientWidth;
+    //     const maxHeight = canvas.clientHeight;
+    //     let newWidth, newHeight;
+
+    //     if (aspectRatio > 1) {
+    //         newWidth = maxWidth;
+    //         newHeight = newWidth / aspectRatio;
+    //     } else {
+    //         newHeight = maxHeight;
+    //         newWidth = newHeight * aspectRatio;
+    //     }
+
+    //     canvas.width = newWidth;
+    //     canvas.height = newHeight;
+    //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //     ctx.drawImage(image, 0, 0, newWidth, newHeight);
+    // }
+
     function displayImage(canvas, image) {
         const ctx = canvas.getContext("2d");
         const aspectRatio = image.width / image.height;
@@ -77,7 +100,51 @@ document.addEventListener("DOMContentLoaded", function() {
         canvas.height = newHeight;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(image, 0, 0, newWidth, newHeight);
+
+        // Only scan QR if the canvas is the laptopCanvas
+        if (canvas.id === "laptop-canvas") {
+            try {
+                const hiddenCanvas = document.createElement("canvas");
+                const hiddenCtx = hiddenCanvas.getContext("2d");
+                hiddenCanvas.width = image.width;
+                hiddenCanvas.height = image.height;
+                hiddenCtx.drawImage(image, 0, 0);
+
+                const imageData = hiddenCtx.getImageData(0, 0, hiddenCanvas.width, hiddenCanvas.height);
+                const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+
+                if (qrCode) {
+                    // result.textContent = "QR Code Data: " + qrCode.data;
+                    try {
+                        // Parse QR string as a URL
+                        const url = new URL(qrCode.data);
+                        const paValue = url.searchParams.get("pa"); // extract ?pa= value
+                        result.textContent = paValue
+                            ? "UPI ID: " + paValue
+                            : "No 'pa' parameter found in QR.";
+                        if (paValue) {
+                            // Copy button functionality
+                            const copyBtn = document.getElementById("copy-btn");
+                            copyBtn.onclick = function () {
+                                navigator.clipboard.writeText(paValue).then(() => {
+                                    copyBtn.textContent = "Copied!";
+                                    setTimeout(() => copyBtn.textContent = "Copy", 2000);
+                                });
+                            };
+                        }
+                    } catch (e) {
+                        // Fallback if it's not a valid URL
+                        result.textContent = "QR Code Data: " + qrCode.data;
+                    }
+                } else {
+                    result.textContent = "No QR code found in this laptop screenshot.";
+                }
+            } catch (err) {
+                console.error("QR Scan error:", err);
+            }
+        }
     }
+
 
     function combineScreenshots() {
         if (laptopImage === null || (mobileImage === null && screenSizeDropdownMobile.value !== 'none')) {
@@ -126,13 +193,13 @@ document.addEventListener("DOMContentLoaded", function() {
         resultImage.src = combinedImageSrc;
         resultImage.style.display = 'block';
 
-        resultCanvas.toBlob(function(blob) {
+        resultCanvas.toBlob(function (blob) {
             const item = new ClipboardItem({ "image/png": blob });
 
             if (navigator.clipboard) {
-                navigator.clipboard.write([item]).then(function() {
+                navigator.clipboard.write([item]).then(function () {
                     console.log("Combined image copied to clipboard.");
-                }).catch(function(error) {
+                }).catch(function (error) {
                     console.error("Error copying combined image to clipboard:", error);
                 });
             } else {
@@ -170,9 +237,43 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const removeButtons = document.querySelectorAll('.remove-button');
     removeButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const canvasId = this.dataset.canvasId;
             clearCanvas(canvasId);
         });
     });
+
+    // laptopCanvas.addEventListener('change', function(event) {
+    //   const file = event.target.files[0];
+    //   if (!file) return;
+
+    //   const reader = new FileReader();
+    //   reader.onload = function(e) {
+    //     const img = new Image();
+    //     img.src = e.target.result;
+
+    //     img.onload = function() {
+    //       // Create hidden canvas
+    //       const canvas = document.createElement("canvas");
+    //       const ctx = canvas.getContext("2d");
+    //       canvas.width = img.width;
+    //       canvas.height = img.height;
+    //       ctx.drawImage(img, 0, 0);
+
+    //       // Scan for QR
+    //       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    //       console.log(imageData);
+
+    //       const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+    //       console.log(qrCode)
+
+    //       if (qrCode) {
+    //         result.textContent = "✅ QR Code Data: " + qrCode.data;
+    //       } else {
+    //         result.textContent = "❌ No QR code found in this image.";
+    //       }
+    //     };
+    //   };
+    //   reader.readAsDataURL(file);
+    // });
 });

@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <link rel="stylesheet" href="style.css">
     <title>Screenshot Tool</title>
 </head>
+
 <body>
     <div class="container">
+        <!-- <p id="result">Result will appear here...</p> -->
         <div class="canvas-container">
             <div class="canvas-item">
                 <h2 class="heading">LAPTOP SCREENSHOT</h2>
@@ -52,11 +56,20 @@
                 </div>
             </div>
         </div>
-        <button id="combine-button">Combine</button>
-        <button id="measure-size-button">Measure Screen Size</button>
+        <div class="btn-container">
+            <div>
+                <button id="combine-button">Combine</button>
+                <button id="measure-size-button">Measure Screen Size</button>
+            </div>
+            <div class="upi-payment-container" id="result-box">
+                <span id="upi-text"></span>
+                <button id="copy-btn">Copy</button>
+            </div>
+        </div>
         <p id="screen-size-info"></p>
         <img id="result-image" alt="Combined Screenshot">
     </div>
     <script src="script.js"></script>
 </body>
+
 </html>
