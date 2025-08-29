@@ -60,27 +60,6 @@ document.addEventListener("DOMContentLoaded", function () {
         canvas.focus();
     }
 
-    // function displayImage(canvas, image) {
-    //     const ctx = canvas.getContext("2d");
-    //     const aspectRatio = image.width / image.height;
-    //     const maxWidth = canvas.clientWidth;
-    //     const maxHeight = canvas.clientHeight;
-    //     let newWidth, newHeight;
-
-    //     if (aspectRatio > 1) {
-    //         newWidth = maxWidth;
-    //         newHeight = newWidth / aspectRatio;
-    //     } else {
-    //         newHeight = maxHeight;
-    //         newWidth = newHeight * aspectRatio;
-    //     }
-
-    //     canvas.width = newWidth;
-    //     canvas.height = newHeight;
-    //     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    //     ctx.drawImage(image, 0, 0, newWidth, newHeight);
-    // }
-
     function displayImage(canvas, image) {
         const ctx = canvas.getContext("2d");
         const aspectRatio = image.width / image.height;
@@ -144,58 +123,66 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     }
-
-
+    
     function combineScreenshots() {
         if (laptopImage === null || (mobileImage === null && screenSizeDropdownMobile.value !== 'none')) {
             alert("Both screenshots must be pasted before combining.");
             return;
         }
 
-        const laptopScreenSize = screenSizeDropdownLaptop.value.split('x');
-        let mobileScreenSize;
-        if (screenSizeDropdownMobile.value !== 'none') {
-            mobileScreenSize = screenSizeDropdownMobile.value.split('x');
-        } else {
-            mobileScreenSize = [1125, 2436];
+        // --- Use actual image dimensions (not dropdown) ---
+        const lW = laptopImage.naturalWidth || laptopImage.width;
+        const lH = laptopImage.naturalHeight || laptopImage.height;
+
+        let mW = 0, mH = 0;
+        if (mobileImage) {
+            mW = mobileImage.naturalWidth || mobileImage.width;
+            mH = mobileImage.naturalHeight || mobileImage.height;
         }
 
-        const laptopCanvasSize = {
-            width: parseInt(laptopScreenSize[0]),
-            height: parseInt(laptopScreenSize[1])
-        };
-        const mobileCanvasSize = {
-            width: parseInt(mobileScreenSize[0]),
-            height: parseInt(mobileScreenSize[1])
-        };
+        // --- Crop mobile: remove top status bar ---
+        // 5% of height; tweak if needed (e.g., 0.06 for 6%)
+        const TOP_CROP_PERCENT = 0.05;
+        const topCropPx = mobileImage ? Math.max(0, Math.round(mH * TOP_CROP_PERCENT)) : 0;
+        const mCropH = mobileImage ? (mH - topCropPx) : 0;
 
-        const finalHeight = Math.max(laptopCanvasSize.height, mobileCanvasSize.height);
-        const scaleLaptop = finalHeight / laptopCanvasSize.height;
-        const scaleMobile = finalHeight / mobileCanvasSize.height;
+        // --- Final height = max of laptop height and cropped mobile height ---
+        const finalHeight = Math.max(lH, mCropH || 0);
 
-        const laptopScaledWidth = laptopCanvasSize.width * scaleLaptop;
-        const mobileScaledWidth = mobileCanvasSize.width * scaleMobile;
+        // --- Scale widths to keep aspect ratio at finalHeight ---
+        const lScale = finalHeight / lH;
+        const lDestW = Math.round(lW * lScale);
 
-        const finalWidth = laptopScaledWidth + mobileScaledWidth;
+        let mDestW = 0;
+        if (mobileImage) {
+            const mScale = finalHeight / mCropH;
+            mDestW = Math.round(mW * mScale);
+        }
 
+        // --- Create result canvas ONCE ---
         const resultCanvas = document.createElement('canvas');
-        resultCanvas.width = finalWidth;
+        resultCanvas.width = lDestW + mDestW;
         resultCanvas.height = finalHeight;
         const resultCtx = resultCanvas.getContext('2d');
 
-        resultCtx.drawImage(laptopImage, 0, 0, laptopScaledWidth, finalHeight);
-        if (mobileImage !== null) {
-            resultCtx.drawImage(mobileImage, laptopScaledWidth, 0, mobileScaledWidth, finalHeight);
+        // Draw laptop (full)
+        resultCtx.drawImage(laptopImage, 0, 0, lDestW, finalHeight);
+
+        // Draw mobile (cropped top off)
+        if (mobileImage) {
+            resultCtx.drawImage(
+                mobileImage,
+                0, topCropPx, mW, mCropH,          // source (skip top bar)
+                lDestW, 0, mDestW, finalHeight     // destination
+            );
         }
 
         const combinedImageSrc = resultCanvas.toDataURL("image/png", 1.0);
-
         resultImage.src = combinedImageSrc;
         resultImage.style.display = 'block';
 
         resultCanvas.toBlob(function (blob) {
             const item = new ClipboardItem({ "image/png": blob });
-
             if (navigator.clipboard) {
                 navigator.clipboard.write([item]).then(function () {
                     console.log("Combined image copied to clipboard.");
@@ -207,6 +194,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }, "image/png", 1.0);
     }
+
+
 
     function measureScreenSize() {
         const laptopScreenSize = screenSizeDropdownLaptop.value.split('x');
@@ -242,38 +231,4 @@ document.addEventListener("DOMContentLoaded", function () {
             clearCanvas(canvasId);
         });
     });
-
-    // laptopCanvas.addEventListener('change', function(event) {
-    //   const file = event.target.files[0];
-    //   if (!file) return;
-
-    //   const reader = new FileReader();
-    //   reader.onload = function(e) {
-    //     const img = new Image();
-    //     img.src = e.target.result;
-
-    //     img.onload = function() {
-    //       // Create hidden canvas
-    //       const canvas = document.createElement("canvas");
-    //       const ctx = canvas.getContext("2d");
-    //       canvas.width = img.width;
-    //       canvas.height = img.height;
-    //       ctx.drawImage(img, 0, 0);
-
-    //       // Scan for QR
-    //       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    //       console.log(imageData);
-
-    //       const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
-    //       console.log(qrCode)
-
-    //       if (qrCode) {
-    //         result.textContent = "✅ QR Code Data: " + qrCode.data;
-    //       } else {
-    //         result.textContent = "❌ No QR code found in this image.";
-    //       }
-    //     };
-    //   };
-    //   reader.readAsDataURL(file);
-    // });
 });
